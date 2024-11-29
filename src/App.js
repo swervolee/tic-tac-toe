@@ -1,30 +1,48 @@
-import './App.css';
 import { useState } from 'react';
 
 function Cell({ value, onCellClick }) {
-  return <button className="cell" onClick={onCellClick}>{value}</button>;
+  return (
+    <button
+      className="p-4 border
+      border-gray-300
+      rounded-md
+      bg-primary
+      hover:hoverBg
+      focus:outline-none
+      focus:ring-2
+      focus:ring-blue-500
+      text-lg
+      font-bold
+      w-20
+      h-20 
+      flex 
+      items-center
+      justify-center"
+      onClick={onCellClick}
+    >
+      {value}
+    </button>
+  );
 }
 
-function Board({ xIsNext, squares, onPlay}) {
-
+function Board({ xIsNext, squares, onPlay }) {
   const winner = calculateWinner(squares);
   let status;
 
   if (winner) {
-    status = "Winner: " + winner;
+    status = `Winner: ${winner}`;
   } else {
-    status = "Next player: " + (xIsNext ? "X" : "O");
+    status = `Next player: ${xIsNext ? 'X' : 'O'}`;
   }
 
   function handleClick(i) {
     if (squares[i] || winner) {
-      return; // Ignore click if square is filled or game is over
+      return;
     }
     const nextSquares = squares.slice();
     nextSquares[i] = 'X';
-    onPlay(nextSquares)
+    onPlay(nextSquares);
 
-    // Let the AI make its move after a delay
     setTimeout(() => {
       makeAIMove(nextSquares);
     }, 500);
@@ -34,22 +52,22 @@ function Board({ xIsNext, squares, onPlay}) {
     if (calculateWinner(currentSquares)) {
       return;
     }
-  
+
     const bestMove = findBestMove(currentSquares);
     if (bestMove !== null) {
       const nextSquares = currentSquares.slice();
-      nextSquares[bestMove] = "O";
-      onPlay(nextSquares)
+      nextSquares[bestMove] = 'O';
+      onPlay(nextSquares);
     }
   }
-  
+
   function findBestMove(squares) {
     let bestScore = -Infinity;
     let move = null;
-  
+
     for (let i = 0; i < squares.length; i++) {
       if (squares[i] === null) {
-        squares[i] = "O"; 
+        squares[i] = 'O';
         const score = minimax(squares, false);
         squares[i] = null;
         if (score > bestScore) {
@@ -60,18 +78,18 @@ function Board({ xIsNext, squares, onPlay}) {
     }
     return move;
   }
-  
+
   function minimax(squares, isMaximizing) {
     const winner = calculateWinner(squares);
-    if (winner === "O") return 10;
-    if (winner === "X") return -10;
+    if (winner === 'O') return 10;
+    if (winner === 'X') return -10;
     if (!squares.includes(null)) return 0;
-  
+
     if (isMaximizing) {
       let bestScore = -Infinity;
       for (let i = 0; i < squares.length; i++) {
         if (squares[i] === null) {
-          squares[i] = "O";
+          squares[i] = 'O';
           const score = minimax(squares, false);
           squares[i] = null;
           bestScore = Math.max(score, bestScore);
@@ -82,7 +100,7 @@ function Board({ xIsNext, squares, onPlay}) {
       let bestScore = Infinity;
       for (let i = 0; i < squares.length; i++) {
         if (squares[i] === null) {
-          squares[i] = "X";
+          squares[i] = 'X';
           const score = minimax(squares, true);
           squares[i] = null;
           bestScore = Math.min(score, bestScore);
@@ -91,7 +109,6 @@ function Board({ xIsNext, squares, onPlay}) {
       return bestScore;
     }
   }
-  
 
   function calculateWinner(squares) {
     const lines = [
@@ -113,7 +130,6 @@ function Board({ xIsNext, squares, onPlay}) {
     return null;
   }
 
-  // Dynamically render the 3x3 grid
   const renderBoard = () => {
     const boardRows = [];
     for (let row = 0; row < 3; row++) {
@@ -121,11 +137,15 @@ function Board({ xIsNext, squares, onPlay}) {
       for (let col = 0; col < 3; col++) {
         const index = row * 3 + col;
         cells.push(
-          <Cell key={index} value={squares[index]} onCellClick={() => handleClick(index)} />
+          <Cell
+            key={index}
+            value={squares[index]}
+            onCellClick={() => handleClick(index)}
+          />
         );
       }
       boardRows.push(
-        <div key={row} className="board-row">
+        <div key={row} className="flex space-x-2">
           {cells}
         </div>
       );
@@ -135,8 +155,8 @@ function Board({ xIsNext, squares, onPlay}) {
 
   return (
     <>
-      <div className="status">{status}</div>
-      {renderBoard()}
+      <div className="text-xl font-bold text-primary mb-4">{status}</div>
+      <div className="flex flex-col space-y-2">{renderBoard()}</div>
     </>
   );
 }
@@ -148,7 +168,7 @@ export default function Game() {
   const currentSquares = history[currentMove];
 
   function handlePlay(nextSquares) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares]
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
     setXIsNext(!xIsNext);
@@ -156,32 +176,37 @@ export default function Game() {
 
   function jumpTo(nextMove) {
     setCurrentMove(nextMove);
-    setXIsNext(nextMove % 2 === 0)
+    setXIsNext(nextMove % 2 === 0);
   }
 
   const moves = history.map((squares, move) => {
     let description;
     if (move > 0) {
-      description = 'Go to move #' + move;
+      description = `Go to move #${move}`;
     } else {
-      description = 'Go to game start'
+      description = 'Go to game start';
     }
 
     return (
       <li key={move}>
-        <button onClick={() => jumpTo(move)}> {description}</button>
+        <button
+          className="text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onClick={() => jumpTo(move)}
+        >
+          {description}
+        </button>
       </li>
-    )
-  })
+    );
+  });
 
   return (
-    <div className='game'>
-      <div className='game-board'>
+    <div className="flex flex-col items-center space-y-6">
+      <div className="p-4 bg-gray-100 rounded-lg shadow-md">
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
-      <div className='game-info'>
-        <ol>{moves}</ol>
+      <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
+        <ol className="list-decimal pl-6 space-y-2">{moves}</ol>
       </div>
     </div>
-  )
+  );
 }

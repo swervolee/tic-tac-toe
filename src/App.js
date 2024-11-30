@@ -1,23 +1,25 @@
 import { useState } from 'react';
 
-function Cell({ value, onCellClick }) {
+function Cell({ value, onCellClick, isWinningSquare }) {
   return (
     <button
-      className="p-4 border
-      border-gray-300
-      rounded-md
-      bg-primary
-      hover:hoverBg
-      focus:outline-none
-      focus:ring-2
-      focus:ring-blue-500
-      text-lg
-      font-bold
-      w-20
-      h-20 
-      flex 
-      items-center
-      justify-center"
+      className={`p-4 border
+        border-gray-300
+        rounded-md
+        bg-primary
+        hover:hoverBg
+        focus:outline-none
+        focus:ring-2
+        focus:ring-blue-500
+        text-lg
+        font-bold
+        w-20
+        h-20
+        flex 
+        items-center
+        justify-center
+        ${isWinningSquare ? 'bg-green-400' : ''}
+      `}
       onClick={onCellClick}
     >
       {value}
@@ -30,7 +32,7 @@ function Board({ xIsNext, squares, onPlay }) {
   let status;
 
   if (winner) {
-    status = `Winner: ${winner}`;
+    status = `Winner: ${winner[0]}`;
   } else {
     status = `Next player: ${xIsNext ? 'X' : 'O'}`;
   }
@@ -81,10 +83,15 @@ function Board({ xIsNext, squares, onPlay }) {
 
   function minimax(squares, isMaximizing) {
     const winner = calculateWinner(squares);
-    if (winner === 'O') return 10;
-    if (winner === 'X') return -10;
+    
+    if (winner) {
+      if (winner[0] === 'O') return 10;
+      if (winner[0] === 'X') return -10;
+    }
+  
+    
     if (!squares.includes(null)) return 0;
-
+  
     if (isMaximizing) {
       let bestScore = -Infinity;
       for (let i = 0; i < squares.length; i++) {
@@ -109,6 +116,7 @@ function Board({ xIsNext, squares, onPlay }) {
       return bestScore;
     }
   }
+  
 
   function calculateWinner(squares) {
     const lines = [
@@ -124,7 +132,7 @@ function Board({ xIsNext, squares, onPlay }) {
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
+        return [squares[a], lines[i]];
       }
     }
     return null;
@@ -136,11 +144,13 @@ function Board({ xIsNext, squares, onPlay }) {
       const cells = [];
       for (let col = 0; col < 3; col++) {
         const index = row * 3 + col;
+        const isWinningSquare = winner && winner[1].includes(index);
         cells.push(
           <Cell
             key={index}
             value={squares[index]}
             onCellClick={() => handleClick(index)}
+            isWinningSquare={isWinningSquare}
           />
         );
       }
